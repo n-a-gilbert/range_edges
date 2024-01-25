@@ -5,7 +5,8 @@ library(MetBrewer)
 library(ggh4x)
 
 setwd(here::here("results"))
-
+# File too big to push to GitHub; download from link to local repo
+# https://1drv.ms/u/s!AtvYBfNq7AMkg4llzxN7tWMFyvXUCQ?e=IITVjK
 m <- readRDS("brms_results_2023-11-01.rds")
 
 sp_trends <- brms::ranef( m, pars = "yr")[[1]] |> 
