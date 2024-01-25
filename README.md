@@ -29,3 +29,17 @@ Poleward and uphill range shifts are a common but variable response to anthropog
 * [formatted_data_for_model.RData](./data/formatted_data_for_model.RData) Formatted bird survey data
 * [species_names_review.csv](./data/species_names_review.csv) File for data filtering, has species flagged for removal (e.g., water birds and nocturnal species)
 
+### [figures](./figures): Contains figures and code for figures
+* [code_for_figures](./figures/code_for_figures) Folder with scripts to create figures
+  * [figure_02.R](./figures/code_for_figures/figure_02.R) Script to create each panel for Figure 2
+  * [figure_03.R](./figures/code_for_figures/figure_03.R) Script to create Figure 3
+  * [figure_s1_sr.R](./figures/code_for_figures/figure_s1_s2.R) Script to create Figures S1 and S2
+  * [figure_s3.R](./figures/code_for_figures/figure_s3.R) Script to create Figure S3
+* [figure_01.png](./figures/figure_01.png) Figure 1
+* [figure_01.pptx](./figures/figure_01.pptx) Figure 1 (created in Powerpoint)
+* [figure_02.png](./figures/figure_02.png) Figure 2
+* [figure_02.pptx](./figures/figure_02.pptx) Figure 2 (panels assembled in Powerpoint)
+* [figure_03.png](./figures/figure_03.png) Figure 3
+* [figure_s1.png](./figures/figure_s1.png) Figure S1
+* [figure_s2.png](./figures/figure_s2.png) Figure S2
+* [figure_s3.png](./figures/figure_s3.png) Figure S3
