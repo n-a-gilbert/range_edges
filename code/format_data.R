@@ -3,7 +3,8 @@ library(tidyverse)
 library(lubridate)
 
 setwd(here::here("data"))
-load("bird_site_1995-2023.RData")
+# raw data cannot be shared - available upon request
+d <- readxl::read_excel( "Bird_Site_1995-2023.xlsx" , sheet = 3)
 
 dc <- d |> 
   dplyr::mutate( abbrev = ifelse( abbrev == "YWAR", "YEWA",
