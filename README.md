@@ -43,3 +43,6 @@ Poleward and uphill range shifts are a common but variable response to anthropog
 * [figure_s1.png](./figures/figure_s1.png) Figure S1
 * [figure_s2.png](./figures/figure_s2.png) Figure S2
 * [figure_s3.png](./figures/figure_s3.png) Figure S3
+
+### results. NOTE: the files with model results are too large to share on GitHub. Access them at the following links:
+* brms_results_2023-11-01.rds: Results from Step 1.[Download Link](https://1drv.ms/u/s!AtvYBfNq7AMkg4llzxN7tWMFyvXUCQ?e=IITVjK)
