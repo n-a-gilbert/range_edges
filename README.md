@@ -44,6 +44,7 @@ Poleward and uphill range shifts are a common but variable response to anthropog
 * [figure_s2.png](./figures/figure_s2.png) Figure S2
 * [figure_s3.png](./figures/figure_s3.png) Figure S3
 
-### results. NOTE: the files with model results are too large to share on GitHub. Access them at the following links:
+### results NOTE: the files with model results are too large to share on GitHub; download links provided
 * brms_results_2023-11-01.rds: Results from Step 1. [Download link](https://1drv.ms/u/s!AtvYBfNq7AMkg4llzxN7tWMFyvXUCQ?e=IITVjK)
-* leading_edge_analysis.RData: Results from Step 2 for trailing-edge species [Download link](https://1drv.ms/u/s!AtvYBfNq7AMkg4lFAGeIc--nllbz_g?e=dX3CiS)
+* leading_edge_analysis.RData: Results from Step 2 for leading-edge species [Download link](https://1drv.ms/u/s!AtvYBfNq7AMkg4lFAGeIc--nllbz_g?e=dX3CiS)
+* trailing_edge_analysis.RData: Results from Step 2 for trailing-edge species [Download link](https://1drv.ms/u/s!AtvYBfNq7AMkg4lG4AFyCAWyMD1LTg?e=Q4z4ja)
