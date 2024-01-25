@@ -5,7 +5,8 @@ library(janitor)
 
 setwd(here::here("results"))
 # this file is too large (~2GB) to store on GitHub
-# Download it from Google Drive and save it in the "results" folder of your local repo
+# Download from this onedrive link to "results" folder of repo
+# https://1drv.ms/u/s!AtvYBfNq7AMkg4llzxN7tWMFyvXUCQ?e=IITVjK
 m <- readRDS("brms_results_2023-11-01.rds")
 
 sp_trends <- brms::ranef( m, pars = "yr")[[1]] |> 
