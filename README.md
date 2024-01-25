@@ -27,5 +27,5 @@ Poleward and uphill range shifts are a common but variable response to anthropog
 * [code_key.csv](./data/code_key.csv) Key with species common names, scientific names, 4 letter code, and 6-letter code
 * [edge_hardness_metrics.csv](./data/edge_hardness_metrics.csv) Range metrics for each species
 * [formatted_data_for_model.RData](./data/formatted_data_for_model.RData) Formatted bird survey data
-* [species_names_review.csv](./data/species_names_review.csv} File for data filtering, has species flagged for removal (e.g., water birds and nocturnal species)
+* [species_names_review.csv](./data/species_names_review.csv) File for data filtering, has species flagged for removal (e.g., water birds and nocturnal species)
 
