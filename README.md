@@ -12,4 +12,12 @@ Poleward and uphill range shifts are a common but variable response to anthropog
 
  <img src="https://github.com/n-a-gilbert/range_edges/blob/main/figures/figure_01.png" width="300" /> $~~~~~~~~~~~~~~~~~$ <img src="https://github.com/n-a-gilbert/range_edges/blob/main/figures/figure_02.png" width="300" />
 
+
 ## Repository Directory
+
+### [code](./code): Contains code for formatting and analyzing data
+* [calculate_range_metrics.R](./code/calculate_range_metrics.R) Code to calculate range edge hardness metrics using eBird maps and WorldClim
+* [edge_analysis.R](./code/edge_analysis.R) Code to run models for Step 2: population trend modeled by temperature index and range edge hardness
+* [format_data.R](./code/format_data.R) Code to format raw data for Step 1
+* [run_brms_model.R](./code/run_brms_model.R) Code to run the model for Step 1
+
