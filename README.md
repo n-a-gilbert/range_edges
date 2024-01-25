@@ -22,7 +22,7 @@ Poleward and uphill range shifts are a common but variable response to anthropog
 * [run_brms_model.R](./code/run_brms_model.R) Code to run the model for Step 1
 
 ### [data](./data): Contains data for analyses
-* [ebird_abundance](./data/ebird_abundance) File containing breeding season abundance rasters from eBird for each species
+* [ebird_abundance](./data/ebird_abundance) Folder containing breeding season abundance rasters from eBird for each species
 * [bird_site_1995-2023.RData](./data/bird_site_1995-2023.RData) Raw bird survey data; .RData file with one dataframe
 * [code_key.csv](./data/code_key.csv) Key with species common names, scientific names, 4 letter code, and 6-letter code
 * [edge_hardness_metrics.csv](./data/edge_hardness_metrics.csv) Range metrics for each species
