@@ -4,12 +4,9 @@ library(tidyverse)
 library(sf)
 
 setwd(here::here("data"))
-load("bird_site_1995-2023.RData")
+d <- read_csv("coordinates.csv")
 
 sites <- d |> 
-  dplyr::select(xcoord = X_COORD, 
-                ycoord = Y_COORD) |> 
-  dplyr::distinct() |> 
   dplyr::filter(!is.na(xcoord)) |> 
   dplyr::filter(!is.na(ycoord)) |> 
   sf::st_as_sf( coords = c("xcoord", 
