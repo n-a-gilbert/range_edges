@@ -23,10 +23,8 @@ Poleward and uphill range shifts are a common but variable response to anthropog
 
 ### [data](./data): Contains data for analyses
 * [ebird_abundance](./data/ebird_abundance) Folder containing breeding season abundance rasters from eBird for each species
-* [bird_site_1995-2023.RData](./data/bird_site_1995-2023.RData) Raw bird survey data; .RData file with one dataframe
 * [code_key.csv](./data/code_key.csv) Key with species common names, scientific names, 4 letter code, and 6-letter code
 * [edge_hardness_metrics.csv](./data/edge_hardness_metrics.csv) Range metrics for each species
-* [formatted_data_for_model.RData](./data/formatted_data_for_model.RData) Formatted bird survey data
 * [species_names_review.csv](./data/species_names_review.csv) File for data filtering, has species flagged for removal (e.g., water birds and nocturnal species)
 
 ### [figures](./figures): Contains figures and code for figures
@@ -43,3 +41,8 @@ Poleward and uphill range shifts are a common but variable response to anthropog
 * [figure_s1.png](./figures/figure_s1.png) Figure S1
 * [figure_s2.png](./figures/figure_s2.png) Figure S2
 * [figure_s3.png](./figures/figure_s3.png) Figure S3
+
+### results NOTE: the files with model results are too large to share on GitHub; download links provided
+* brms_results_2023-11-01.rds: Results from Step 1. [Download link](https://1drv.ms/u/s!AtvYBfNq7AMkg4llzxN7tWMFyvXUCQ?e=IITVjK)
+* leading_edge_analysis.RData: Results from Step 2 for leading-edge species [Download link](https://1drv.ms/u/s!AtvYBfNq7AMkg4lFAGeIc--nllbz_g?e=dX3CiS)
+* trailing_edge_analysis.RData: Results from Step 2 for trailing-edge species [Download link](https://1drv.ms/u/s!AtvYBfNq7AMkg4lG4AFyCAWyMD1LTg?e=Q4z4ja)
