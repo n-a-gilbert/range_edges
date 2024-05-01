@@ -6,10 +6,11 @@ library(sf)
 
 setwd(here::here("data"))
 load("bird_site_1995-2023.RData")
+d <- read_csv("coordinates.csv")
 
 sites <- d |> 
-  dplyr::select(xcoord = X_COORD, 
-                ycoord = Y_COORD) |> 
+  # dplyr::select(xcoord = X_COORD, 
+                # ycoord = Y_COORD) |> 
   dplyr::distinct() |> 
   dplyr::filter(!is.na(xcoord)) |> 
   dplyr::filter(!is.na(ycoord)) |> 
@@ -75,7 +76,8 @@ abun_df |>
                  legend.text = element_text(color = "black", 
                                             size = 9), 
                  legend.title = element_text(color = "black", size = 9),
-                 legend.margin = margin(-8, 0, 5, 0)) + 
+                 legend.margin = margin(-8, 0, 5, 0),
+                 legend.ticks = element_blank()) + 
   ggplot2::guides(fill = guide_colorbar(ticks = FALSE,
                                         barheight = 0.25,
                                         title.position = "top",
@@ -116,7 +118,8 @@ ti_df |>
                  legend.text = element_text(color = "black", 
                                             size = 9), 
                  legend.title = element_text(color = "black", size = 9),
-                 legend.margin = margin(-8, 0, 5, 0)) + 
+                 legend.margin = margin(-8, 0, 5, 0),
+                 legend.ticks = element_blank()) + 
   ggplot2::guides(fill = guide_colorbar(ticks = FALSE,
                                         barheight = 0.25,
                                         title.position = "top",
@@ -141,9 +144,9 @@ edges_df |>
   ggplot2::geom_tile() + 
   ggplot2::coord_fixed(1.3) +
   ggplot2::scale_color_manual("Edge", 
-                              values = MetBrewer::MetPalettes$Isfahan1[[1]][c(7,1)]) +
+                              values = MetBrewer::MetPalettes$Isfahan1[[1]][c(5,1)]) +
   ggplot2::scale_fill_manual("Edge", 
-                             values = MetBrewer::MetPalettes$Isfahan1[[1]][c(7,1)]) +
+                             values = MetBrewer::MetPalettes$Isfahan1[[1]][c(5,1)]) +
   ggplot2::theme_void() +
   ggplot2::theme(legend.position = "bottom",
                  legend.text = element_text(color = "black",size = 9), 
@@ -187,7 +190,8 @@ nedges_df |>
                  legend.text = element_text(color = "black", 
                                             size = 9), 
                  legend.title = element_text(color = "black", size = 9),
-                 legend.margin = margin(-8, 0, 5, 0)) + 
+                 legend.margin = margin(-8, 0, 5, 0),
+                 legend.ticks = element_blank()) + 
   ggplot2::guides(fill = guide_colorbar(ticks = FALSE,
                                         barheight = 0.25,
                                         title.position = "top",
@@ -230,8 +234,8 @@ eh |>
   ggplot2::facet_wrap(~edge) + 
   ggplot2::geom_histogram(alpha = 0.5) +
   geom_vline(xintercept = 1, linetype = "dashed", linewidth = 0.75) +
-  ggplot2::scale_fill_manual(values = MetBrewer::MetPalettes$Isfahan1[[1]][c(1,7)]) +
-  ggplot2::scale_color_manual(values = MetBrewer::MetPalettes$Isfahan1[[1]][c(1,7)]) +
+  ggplot2::scale_fill_manual(values = MetBrewer::MetPalettes$Isfahan1[[1]][c(1,6)]) +
+  ggplot2::scale_color_manual(values = MetBrewer::MetPalettes$Isfahan1[[1]][c(1,5)]) +
   ggplot2::theme_minimal() +
   ggplot2::labs(x = "Range edge hardness", 
                 y = "Frequency") +
