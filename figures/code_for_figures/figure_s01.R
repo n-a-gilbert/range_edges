@@ -8,7 +8,7 @@ load("brms_data_revision.RData")
 
 key <- readr::read_csv("code_key.csv")
 
-eh <- readr::read_csv("edge_hardness_metrics_v02.csv") |> 
+eh <- readr::read_csv("edge_hardness_metrics.csv") |> 
   dplyr::left_join(key) |> 
   dplyr::rename(code4 = sp)
 

@@ -1,184 +1,252 @@
 library(here)
+library(raster)
 library(tidyverse)
-library(brms)
 library(MetBrewer)
-library(ggh4x)
-
-setwd(here::here("results"))
-# File too big to push to GitHub; download from link to local repo
-# https://1drv.ms/u/s!AtvYBfNq7AMkg4llzxN7tWMFyvXUCQ?e=IITVjK
-m <- readRDS("brms_results_2023-11-01.rds")
-
-sp_trends <- brms::ranef( m, pars = "yr")[[1]] |> 
-  tibble::as_tibble(rownames = "sp") |> 
-  setNames(c("sp", "mean", "sd", "l95", "u95")) |> 
-  dplyr::mutate(sp = as.numeric(sp))
-
-rm(m)
-# File too big to push to GitHub; download from link to local repo
-# https://1drv.ms/u/s!AtvYBfNq7AMkg4lFAGeIc--nllbz_g?e=dX3CiS
-load("leading_edge_analysis.RData")
-# File too big to push to GitHub; download from link to local repo
-# https://1drv.ms/u/s!AtvYBfNq7AMkg4lG4AFyCAWyMD1LTg?e=Q4z4ja
-load("trailing_edge_analysis.RData")
+library(sf)
 
 setwd(here::here("data"))
+d <- read_csv("coordinates.csv")
 
-load("formatted_data_for_model.RData")
+sites <- d |> 
+  dplyr::distinct() |> 
+  dplyr::filter(!is.na(xcoord)) |> 
+  dplyr::filter(!is.na(ycoord)) |> 
+  sf::st_as_sf( coords = c("xcoord", 
+                           "ycoord"), 
+                crs = 2027)
+
+clim <- raster::getData("worldclim", var = 'bio', res = 10)
+
+setwd(here::here("data/ebird_abundance"))
+
+map <- raster::raster("yetvir_abundance_seasonal_breeding_mean_2021.tif")
+
+map84 <- raster::projectRaster( map, crs = crs(clim[[10]]))
+
+abun <- raster::resample(map84, clim[[10]] )
+
+abun[ abun == 0 ] <- NA
+
+range <- abun
+
+range[ range > 0 ] <- 1
+
+ti <- range * ( clim[[10]] / 10 )
+
+edges <- ti
+
+edges[ edges > quantile( edges, c(0.10), na.rm = TRUE) & 
+         edges < quantile( edges, c(0.90), na.rm = TRUE)] <- NA
+
+edges[!is.na(edges)] <- 1
+
+nedges <- edges * abun
+
+abun_trim <- raster::trim(abun)
+ti_trim <- raster::trim(ti)  
+edges_trim <- raster::trim(edges)
+nedges_trim <- raster::trim(nedges)
+
+abun_spdf <- as(abun_trim, "SpatialPixelsDataFrame")
+
+abun_df <- as.data.frame(abun_spdf)
+
+( panela <- abun_df |> 
+    dplyr::filter(x > -104) |> 
+    ggplot2::ggplot(aes(x = x, y = y, fill = breeding, color = breeding)) + 
+    ggplot2::geom_tile() + 
+    ggplot2::coord_fixed(1.3) +
+    ggplot2::scale_fill_viridis_c("Abundance",
+                                  option = "B",
+                                  begin = 0.8,
+                                  end = 0.2,
+                                  breaks = c(0.08, 0.45),
+                                  labels = c("Low", "High")) +
+    ggplot2::scale_color_viridis_c("Abundance",
+                                   option = "B",
+                                   begin = 0.8,
+                                   end = 0.2,
+                                   breaks = c(0.08, 0.45),
+                                   labels = c("Low", "High")) +
+    ggplot2::theme_void() +
+    ggplot2::theme(legend.position = "bottom",
+                   legend.text = element_text(color = "black", 
+                                              size = 9), 
+                   legend.title = element_text(color = "black", size = 9),
+                   legend.margin = margin(-8, 0, 5, 0),
+                   legend.ticks = element_blank()) + 
+    ggplot2::guides(fill = guide_colorbar(ticks = FALSE,
+                                          barheight = 0.25,
+                                          title.position = "top",
+                                          barwidth = 3)) )
+
+# saving panels individually and assembling in PowerPoint because I'm a dummy
+setwd(here::here("figures"))
+ggplot2::ggsave(
+  filename = "figure_03a.png", 
+  width = 1.75, 
+  height = 1.75, 
+  units = "in", 
+  dpi = 300
+)
+
+ti_spdf <- as(ti_trim, "SpatialPixelsDataFrame")
+ti_df <- as.data.frame(ti_spdf)
+
+( panelb <- ti_df |> 
+    dplyr::filter(x > -104) |> 
+    ggplot2::ggplot(aes(x = x, y = y, fill = layer, color = layer)) + 
+    ggplot2::geom_tile() + 
+    ggplot2::coord_fixed(1.3) +
+    ggplot2::scale_fill_gradientn("Temperature",
+                                  colours = c(MetBrewer::MetPalettes$Egypt[[1]][2],
+                                              "gray70",
+                                              MetBrewer::MetPalettes$Egypt[[1]][1]),
+                                  breaks = c(15.05, 28.95),
+                                  labels = c("Low", "High")) +
+    ggplot2::scale_color_gradientn("Temperature",
+                                   colours = c(MetBrewer::MetPalettes$Egypt[[1]][2],
+                                               "gray70",
+                                               MetBrewer::MetPalettes$Egypt[[1]][1]),
+                                   breaks = c(15.05, 28.95),
+                                   labels = c("Low", "High")) +
+    ggplot2::theme_void() +
+    ggplot2::theme(legend.position = "bottom",
+                   legend.text = element_text(color = "black", 
+                                              size = 9), 
+                   legend.title = element_text(color = "black", size = 9),
+                   legend.margin = margin(-8, 0, 5, 0),
+                   legend.ticks = element_blank()) + 
+    ggplot2::guides(fill = guide_colorbar(ticks = FALSE,
+                                          barheight = 0.25,
+                                          title.position = "top",
+                                          barwidth = 3)) )
+
+setwd(here::here("figures"))
+ggplot2::ggsave(
+  filename = "figure_03b.png", 
+  width = 1.75, 
+  height = 1.75, 
+  units = "in", 
+  dpi = 300
+)
+
+edges_spdf <- as(edges_trim, "SpatialPixelsDataFrame")
+edges_df <- as.data.frame(edges_spdf)
+
+( panelc <- edges_df |> 
+    dplyr::filter(x > -104) |> 
+    dplyr::mutate(edge = ifelse(y > 39, "Leading", "Trailing")) |> 
+    ggplot2::ggplot(aes(x = x, y = y, fill = edge, color = edge)) + 
+    ggplot2::geom_tile() + 
+    ggplot2::coord_fixed(1.3) +
+    ggplot2::scale_color_manual("Edge", 
+                                values = MetBrewer::MetPalettes$Isfahan1[[1]][c(5,1)]) +
+    ggplot2::scale_fill_manual("Edge", 
+                               values = MetBrewer::MetPalettes$Isfahan1[[1]][c(5,1)]) +
+    ggplot2::theme_void() +
+    ggplot2::theme(legend.position = "bottom",
+                   legend.text = element_text(color = "black",size = 9), 
+                   legend.key.size = unit(0.1, "cm"),
+                   legend.title = element_text(color = "white", size = 9),
+                   legend.margin = margin(-8, 0, 5, 0)) +
+    ggplot2::guides(fill = guide_legend(title.position = "top"),
+                    color = guide_legend(title.position = "top")) )
+
+setwd(here::here("figures"))
+ggplot2::ggsave(
+  filename = "figure_03c.png", 
+  width = 1.64, 
+  height = 1.64, 
+  units = "in", 
+  dpi = 300
+)
+
+nedges_spdf <- as(nedges_trim, "SpatialPixelsDataFrame")
+nedges_df <- as.data.frame(nedges_spdf)
+
+nedges_df |> 
+  dplyr::filter(x > -104) |> 
+  ggplot2::ggplot(aes(x = x, y = y, fill = layer, color = layer)) + 
+  ggplot2::geom_tile() + 
+  ggplot2::coord_fixed(1.3) +
+  ggplot2::scale_fill_viridis_c("Abundance",
+                                option = "B",
+                                begin = 0.8,
+                                end = 0.2,
+                                breaks = c(0.08, 0.27),
+                                labels = c("Low", "High")) +
+  ggplot2::scale_color_viridis_c("Abundance",
+                                 option = "B",
+                                 begin = 0.8,
+                                 end = 0.2,
+                                 breaks = c(0.08, 0.27),
+                                 labels = c("Low", "High")) +
+  ggplot2::theme_void() +
+  ggplot2::theme(legend.position = "bottom",
+                 legend.text = element_text(color = "black", 
+                                            size = 9), 
+                 legend.title = element_text(color = "black", size = 9),
+                 legend.margin = margin(-8, 0, 5, 0),
+                 legend.ticks = element_blank()) + 
+  ggplot2::guides(fill = guide_colorbar(ticks = FALSE,
+                                        barheight = 0.25,
+                                        title.position = "top",
+                                        barwidth = 3))
+setwd(here::here("figures"))
+ggplot2::ggsave(
+  filename = "figure_03d.png", 
+  width = 1.75, 
+  height = 1.75, 
+  units = "in", 
+  dpi = 300
+)
+
+setwd(here::here("data"))
 
 key <- readr::read_csv("code_key.csv")
 
 eh <- readr::read_csv("edge_hardness_metrics.csv") |> 
   dplyr::left_join(key) |> 
-  dplyr::rename(code4 = sp) |> 
-  dplyr::right_join( 
-    ncap |> 
-      dplyr::select(sp, code4) |> 
-      dplyr::distinct() )
+  dplyr::rename(code4 = sp)
 
-trailing_sp <- eh |> 
-  dplyr::filter(warm_mdist <= 100) |> 
-  dplyr::mutate(rel_nwarm_sc = as.numeric(scale(log(nwarm_mean / avgn))), 
-                ti_mean_sc = as.numeric(scale(ti_mean)))
-
-leading_sp <- eh |> 
-  dplyr::filter(cold_mdist <= 100) |> 
-  dplyr::mutate(rel_ncold_sc = as.numeric(scale(log(ncold_mean / avgn))), 
-                ti_mean_sc = as.numeric(scale(ti_mean)))
-
-pdat_trailing <- tibble::as_tibble(
-  expand.grid(
-    ti_mean = c(mean(trailing_sp$ti_mean_sc)),
-    rel_nwarm = seq( from = min(trailing_sp$rel_nwarm_sc) - 0.2, 
-                     to = max(trailing_sp$rel_nwarm_sc) + 0.2,
-                     by = 0.2)))
-
-plot_trailing <- all_trailing |> 
-  dplyr::select(sample:b_ti_mean_rel_nwarm) |> 
-  dplyr::cross_join(pdat_trailing) |> 
-  dplyr::mutate( p = b_intercept + b_ti_mean * ti_mean + b_rel_nwarm * rel_nwarm + b_ti_mean_rel_nwarm*ti_mean * rel_nwarm) |> 
-  dplyr::group_by(ti_mean, rel_nwarm) |> 
-  dplyr::summarise(mean = mean(p), 
-                   l95 = quantile(p, c(0.025)), 
-                   u95 = quantile(p, c(0.975)))
-
-trailing_trends_for_plot <- trailing_sp |> 
-  dplyr::mutate(rel_nwarm_unscaled = log(nwarm_mean / avgn),
-                rel_nwarm_raw = nwarm_mean / avgn) |> 
-  dplyr::select(sp, code4, ti_mean, rel_nwarm_sc, rel_nwarm_unscaled, rel_nwarm_raw) |> 
-  dplyr::left_join(sp_trends)
-
-trailing_ti_mean_scaled <- scale(trailing_trends_for_plot$ti_mean )
-trailing_eh_scaled <- scale(trailing_trends_for_plot$rel_nwarm_unscaled )
-
-plot_trailing_unscaled <- plot_trailing |> 
-  dplyr::mutate(ti_mean_unscaled = ti_mean * attr(trailing_ti_mean_scaled, "scaled:scale") + 
-                  attr(trailing_ti_mean_scaled , "scaled:center"),
-                rel_nwarm_unscaled = rel_nwarm * attr(trailing_eh_scaled , "scaled:scale") +
-                  attr(trailing_eh_scaled , "scaled:center")) |> 
-  dplyr::mutate(rel_nwarm_raw = exp(rel_nwarm_unscaled))
-
-pdat_leading <- tibble::as_tibble(
-  expand.grid(
-    ti_mean = c(mean(leading_sp$ti_mean_sc)),
-    rel_ncold = seq( from = min(leading_sp$rel_ncold_sc) - 0.2, 
-                     to = max(leading_sp$rel_ncold_sc) + 0.2,
-                     by = 0.2)))
-
-plot_leading <- all_leading |> 
-  dplyr::select(sample:b_ti_mean_rel_ncold) |> 
-  dplyr::cross_join(pdat_leading) |> 
-  dplyr::mutate( p = b_intercept + b_ti_mean * ti_mean + b_rel_ncold * rel_ncold + b_ti_mean_rel_ncold*ti_mean * rel_ncold) |> 
-  dplyr::group_by(ti_mean, rel_ncold) |> 
-  dplyr::summarise(mean = mean(p), 
-                   l95 = quantile(p, c(0.025)), 
-                   u95 = quantile(p, c(0.975)))
-
-leading_trends_for_plot <- leading_sp |> 
-  dplyr::mutate(rel_ncold_unscaled = log(ncold_mean / avgn),
-                rel_ncold_raw = ncold_mean / avgn) |> 
-  dplyr::select(sp, code4, ti_mean, rel_ncold_sc, rel_ncold_unscaled, rel_ncold_raw) |> 
-  dplyr::left_join(sp_trends)
-
-leading_ti_mean_scaled <- scale(leading_trends_for_plot$ti_mean )
-leading_eh_scaled <- scale(leading_trends_for_plot$rel_ncold_unscaled )
-
-plot_leading_unscaled <- plot_leading |> 
-  dplyr::mutate(ti_mean_unscaled = ti_mean * attr(leading_ti_mean_scaled, "scaled:scale") + 
-                  attr(leading_ti_mean_scaled , "scaled:center"),
-                rel_ncold_unscaled = rel_ncold * attr(leading_eh_scaled , "scaled:scale") +
-                  attr(leading_eh_scaled , "scaled:center")) |> 
-  dplyr::mutate(rel_ncold_raw = exp(rel_ncold_unscaled))
-
-strip <- ggh4x::strip_themed(text_x = elem_list_text(color = MetBrewer::MetPalettes$Isfahan1[[1]][c(1,7)]))
-
-model_predictions <- plot_leading_unscaled |> 
-  dplyr::rename( edge_hardness = rel_ncold_raw) |> 
-  tibble::add_column( edge = "Leading edge") |> 
-  dplyr::ungroup() |> 
-  dplyr::select(ti_mean_unscaled, edge_hardness, edge, mean:u95) |> 
+eh |> 
+  dplyr::mutate( eh_leading = ncold_mean / avgn,
+                 eh_trailing = nwarm_mean / avgn ) |> 
+  dplyr::select( code4, avgn, ti_mean, ti_sd, eh_leading, eh_trailing, cold_mdist, warm_mdist ) |> 
+  dplyr::filter(warm_mdist < 100 ) |> 
+  dplyr::select(code4, avgn, ti_mean, ti_sd, eh_trailing) |> 
   dplyr::full_join(
-    plot_trailing_unscaled |>
-      dplyr::rename( edge_hardness = rel_nwarm_raw) |> 
-      tibble::add_column( edge = "Trailing edge") |> 
-      dplyr::ungroup() |> 
-      dplyr::select(ti_mean_unscaled, edge_hardness, edge, mean:u95)) |> 
-  dplyr::mutate(edge = factor(edge, levels = c("Trailing edge", "Leading edge")))
-
-model_trends <- trailing_trends_for_plot |> 
-  dplyr::select(code4, ti_mean, edge_hardness = rel_nwarm_raw, mean, l95, u95) |> 
-  tibble::add_column( edge = "Trailing edge") |> 
-  dplyr::full_join(
-    leading_trends_for_plot |> 
-      dplyr::select(code4, ti_mean, edge_hardness = rel_ncold_raw, mean, l95, u95) |> 
-      tibble::add_column(edge = "Leading edge")) |> 
-  dplyr::mutate(edge = factor(edge, levels = c("Trailing edge", "Leading edge")))
-
-ggplot() + 
-  facet_wrap2(~edge, strip = strip, ncol = 1) +
-  geom_errorbar(data = model_trends, 
-                aes(x = edge_hardness, 
-                    ymin = l95, 
-                    ymax = u95), 
-                width = 0,
-                color = "gray40",
-                size = 0.5) +
-  geom_point(data = model_trends, 
-             aes(x = edge_hardness, y = mean),
-             color = "gray40",
-             size = 1.5) +
-  geom_hline(yintercept = 0, linetype = "dashed", color = MetBrewer::MetPalettes$Johnson[[1]][5]) +
-  geom_ribbon(data = model_predictions, 
-              aes(x = edge_hardness,
-                  ymin = l95,
-                  ymax = u95,
-                  fill = edge), color = NA, alpha = 0.2, show.legend = FALSE) +
-  geom_line(data = model_predictions, 
-            aes(x = edge_hardness, 
-                y = mean, 
-                color = edge),
-            size = 2, show.legend = FALSE) +
-  ggplot2::scale_color_manual("Edge", 
-                              values = MetBrewer::MetPalettes$Isfahan1[[1]][c(1,7)]) +
-  ggplot2::scale_fill_manual("Edge", 
-                             values = MetBrewer::MetPalettes$Isfahan1[[1]][c(1,7)]) +
-  
-  labs(
-    x = "Range edge hardness",
-    y = "Population trend") +
-  theme_minimal() +
-  theme(axis.text = element_text(size = 10, color = "black"), 
-        axis.title = element_text(size = 11, color = "black"), 
-        strip.text = element_text(size = 11, color = "black", face = "bold"),
-        panel.background = element_rect(fill = "white", color = NA), 
-        plot.background = element_rect(fill = "white", color = NA),
-        panel.spacing = unit(1.5, "lines"),
-        plot.margin = margin(0.25, 1, 0.25, 0.25, unit = "lines"))
+    eh |> 
+      dplyr::mutate( eh_leading = ncold_mean / avgn,
+                     eh_trailing = nwarm_mean / avgn ) |>
+      dplyr::select( code4, avgn, ti_mean, ti_sd, eh_leading, eh_trailing, cold_mdist, warm_mdist ) |> 
+      dplyr::filter(cold_mdist < 100 ) |> 
+      dplyr::select(code4, avgn, ti_mean, ti_sd, eh_leading)) |> 
+  tidyr::pivot_longer(eh_trailing:eh_leading, names_to = "edge", values_to = "hardness") |> 
+  dplyr::filter(!is.na(hardness)) |> 
+  dplyr::mutate(edge = ifelse(grepl("leading", edge), "Leading edge", "Trailing edge")) |>
+  dplyr::mutate(edge = factor(edge, levels = c("Trailing edge", "Leading edge"))) |> 
+  ggplot2::ggplot(aes(x = hardness, fill = edge, color = edge)) + 
+  ggplot2::facet_wrap(~edge) + 
+  ggplot2::geom_histogram(alpha = 0.5) +
+  geom_vline(xintercept = 1, linetype = "dashed", linewidth = 0.75) +
+  ggplot2::scale_fill_manual(values = MetBrewer::MetPalettes$Isfahan1[[1]][c(1,6)]) +
+  ggplot2::scale_color_manual(values = MetBrewer::MetPalettes$Isfahan1[[1]][c(1,5)]) +
+  ggplot2::theme_minimal() +
+  ggplot2::labs(x = "Range edge hardness", 
+                y = "Frequency") +
+  ggplot2::theme(legend.position = "none",
+                 axis.text = element_text(color = "black", size = 11),
+                 axis.title = element_text(color = "black", size = 12), 
+                 strip.text = element_text(color = "black", size = 13), 
+                 panel.background = element_rect(fill = "white", color = NA), 
+                 plot.background = element_rect(fill = "white", color = NA))
 
 setwd(here::here("figures"))
-ggsave(
-  "figure_03.png", 
-  width = 4, 
-  height = 6, 
+ggplot2::ggsave(
+  filename = "figure_03e.png",  width = 5, 
+  height = 2.5,
   units = "in", 
-  dpi = 300)
+  dpi = 300
+)  

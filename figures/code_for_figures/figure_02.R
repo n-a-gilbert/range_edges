@@ -1,252 +1,119 @@
 library(here)
-library(raster)
 library(tidyverse)
-library(MetBrewer)
 library(sf)
+library(ggspatial)
+library(MetBrewer)
+library(cowplot)
+
+sp_list <- c("Alder Flycatcher", "Baltimore Oriole", "Bay-breasted Warbler", 
+             "Black-backed Woodpecker", "Blackburnian Warbler", "Blue-winged Warbler", 
+             "Boreal Chickadee", "Brown Thrasher", "Canada Jay", "Canada Warbler", 
+             "Cape May Warbler", "Connecticut Warbler", "Dark-eyed Junco", 
+             "Eastern Bluebird", "Eastern Towhee", "Eastern Wood-Pewee", "Evening Grosbeak", 
+             "Golden-crowned Kinglet", "Golden-winged Warbler", "Great Crested Flycatcher", 
+             "Hermit Thrush", "Indigo Bunting", "Lincoln's Sparrow", "Magnolia Warbler", 
+             "Mourning Dove", "Mourning Warbler", "Nashville Warbler", "Northern Waterthrush", 
+             "Olive-sided Flycatcher", "Palm Warbler", "Pine Warbler", "Purple Finch", 
+             "Red-bellied Woodpecker", "Red-breasted Nuthatch", "Red Crossbill", 
+             "Ruby-crowned Kinglet", "Ruby-throated Hummingbird", "Ruffed Grouse", 
+             "Scarlet Tanager", "Sedge Wren", "Spruce Grouse", "Swainson's Thrush", 
+             "Tennessee Warbler", "White-throated Sparrow", "White-winged Crossbill", 
+             "Wilson's Warbler", "Winter Wren", "Wood Thrush", "Yellow-bellied Flycatcher", 
+             "Yellow-bellied Sapsucker", "Yellow-billed Cuckoo", "Yellow-rumped Warbler", 
+             "Yellow-throated Vireo")
 
 setwd(here::here("data"))
-d <- read_csv("coordinates.csv")
 
-sites <- d |> 
-  dplyr::distinct() |> 
-  dplyr::filter(!is.na(xcoord)) |> 
-  dplyr::filter(!is.na(ycoord)) |> 
+coords <- readr::read_csv("coordinates.csv") |> 
   sf::st_as_sf( coords = c("xcoord", 
                            "ycoord"), 
                 crs = 2027)
 
-clim <- raster::getData("worldclim", var = 'bio', res = 10)
+key <- readr::read_csv("code_key.csv") |> 
+  dplyr::filter(common %in% sp_list)
 
-setwd(here::here("data/ebird_abundance"))
-
-map <- raster::raster("yetvir_abundance_seasonal_breeding_mean_2021.tif")
-
-map84 <- raster::projectRaster( map, crs = crs(clim[[10]]))
-
-abun <- raster::resample(map84, clim[[10]] )
-
-abun[ abun == 0 ] <- NA
-
-range <- abun
-
-range[ range > 0 ] <- 1
-
-ti <- range * ( clim[[10]] / 10 )
-
-edges <- ti
-
-edges[ edges > quantile( edges, c(0.10), na.rm = TRUE) & 
-         edges < quantile( edges, c(0.90), na.rm = TRUE)] <- NA
-
-edges[!is.na(edges)] <- 1
-
-nedges <- edges * abun
-
-abun_trim <- raster::trim(abun)
-ti_trim <- raster::trim(ti)  
-edges_trim <- raster::trim(edges)
-nedges_trim <- raster::trim(nedges)
-
-abun_spdf <- as(abun_trim, "SpatialPixelsDataFrame")
-
-abun_df <- as.data.frame(abun_spdf)
-
-abun_df |> 
-  dplyr::filter(x > -104) |> 
-  ggplot2::ggplot(aes(x = x, y = y, fill = breeding, color = breeding)) + 
-  ggplot2::geom_tile() + 
-  ggplot2::coord_fixed(1.3) +
-  ggplot2::scale_fill_viridis_c("Abundance",
-                                option = "B",
-                                begin = 0.8,
-                                end = 0.2,
-                                breaks = c(0.08, 0.45),
-                                labels = c("Low", "High")) +
-  ggplot2::scale_color_viridis_c("Abundance",
-                                 option = "B",
-                                 begin = 0.8,
-                                 end = 0.2,
-                                 breaks = c(0.08, 0.45),
-                                 labels = c("Low", "High")) +
-  ggplot2::theme_void() +
-  ggplot2::theme(legend.position = "bottom",
-                 legend.text = element_text(color = "black", 
-                                            size = 9), 
-                 legend.title = element_text(color = "black", size = 9),
-                 legend.margin = margin(-8, 0, 5, 0),
-                 legend.ticks = element_blank()) + 
-  ggplot2::guides(fill = guide_colorbar(ticks = FALSE,
-                                        barheight = 0.25,
-                                        title.position = "top",
-                                        barwidth = 3))
-
-# saving panels individually and assembling in PowerPoint because I'm a dummy
-setwd(here::here("figures"))
-ggplot2::ggsave(
-  filename = "figure_02a.png", 
-  width = 1.75, 
-  height = 1.75, 
-  units = "in", 
-  dpi = 300
-)
-
-ti_spdf <- as(ti_trim, "SpatialPixelsDataFrame")
-ti_df <- as.data.frame(ti_spdf)
-
-ti_df |> 
-  dplyr::filter(x > -104) |> 
-  ggplot2::ggplot(aes(x = x, y = y, fill = layer, color = layer)) + 
-  ggplot2::geom_tile() + 
-  ggplot2::coord_fixed(1.3) +
-  ggplot2::scale_fill_gradientn("Temperature",
-                                colours = c(MetBrewer::MetPalettes$Egypt[[1]][2],
-                                            "gray70",
-                                            MetBrewer::MetPalettes$Egypt[[1]][1]),
-                                breaks = c(15.05, 28.95),
-                                labels = c("Low", "High")) +
-  ggplot2::scale_color_gradientn("Temperature",
-                                 colours = c(MetBrewer::MetPalettes$Egypt[[1]][2],
-                                             "gray70",
-                                             MetBrewer::MetPalettes$Egypt[[1]][1]),
-                                 breaks = c(15.05, 28.95),
-                                 labels = c("Low", "High")) +
-  ggplot2::theme_void() +
-  ggplot2::theme(legend.position = "bottom",
-                 legend.text = element_text(color = "black", 
-                                            size = 9), 
-                 legend.title = element_text(color = "black", size = 9),
-                 legend.margin = margin(-8, 0, 5, 0),
-                 legend.ticks = element_blank()) + 
-  ggplot2::guides(fill = guide_colorbar(ticks = FALSE,
-                                        barheight = 0.25,
-                                        title.position = "top",
-                                        barwidth = 3))
-
-setwd(here::here("figures"))
-ggplot2::ggsave(
-  filename = "figure_02b.png", 
-  width = 1.75, 
-  height = 1.75, 
-  units = "in", 
-  dpi = 300
-)
-
-edges_spdf <- as(edges_trim, "SpatialPixelsDataFrame")
-edges_df <- as.data.frame(edges_spdf)
-
-edges_df |> 
-  dplyr::filter(x > -104) |> 
-  dplyr::mutate(edge = ifelse(y > 39, "Leading", "Trailing")) |> 
-  ggplot2::ggplot(aes(x = x, y = y, fill = edge, color = edge)) + 
-  ggplot2::geom_tile() + 
-  ggplot2::coord_fixed(1.3) +
-  ggplot2::scale_color_manual("Edge", 
-                              values = MetBrewer::MetPalettes$Isfahan1[[1]][c(5,1)]) +
-  ggplot2::scale_fill_manual("Edge", 
-                             values = MetBrewer::MetPalettes$Isfahan1[[1]][c(5,1)]) +
-  ggplot2::theme_void() +
-  ggplot2::theme(legend.position = "bottom",
-                 legend.text = element_text(color = "black",size = 9), 
-                 legend.key.size = unit(0.1, "cm"),
-                 legend.title = element_text(color = "white", size = 9),
-                 legend.margin = margin(-8, 0, 5, 0)) +
-  ggplot2::guides(fill = guide_legend(title.position = "top"),
-                  color = guide_legend(title.position = "top"))
-
-setwd(here::here("figures"))
-ggplot2::ggsave(
-  filename = "figure_02c.png", 
-  width = 1.64, 
-  height = 1.64, 
-  units = "in", 
-  dpi = 300
-)
-
-nedges_spdf <- as(nedges_trim, "SpatialPixelsDataFrame")
-nedges_df <- as.data.frame(nedges_spdf)
-
-nedges_df |> 
-  dplyr::filter(x > -104) |> 
-  ggplot2::ggplot(aes(x = x, y = y, fill = layer, color = layer)) + 
-  ggplot2::geom_tile() + 
-  ggplot2::coord_fixed(1.3) +
-  ggplot2::scale_fill_viridis_c("Abundance",
-                                option = "B",
-                                begin = 0.8,
-                                end = 0.2,
-                                breaks = c(0.08, 0.27),
-                                labels = c("Low", "High")) +
-  ggplot2::scale_color_viridis_c("Abundance",
-                                 option = "B",
-                                 begin = 0.8,
-                                 end = 0.2,
-                                 breaks = c(0.08, 0.27),
-                                 labels = c("Low", "High")) +
-  ggplot2::theme_void() +
-  ggplot2::theme(legend.position = "bottom",
-                 legend.text = element_text(color = "black", 
-                                            size = 9), 
-                 legend.title = element_text(color = "black", size = 9),
-                 legend.margin = margin(-8, 0, 5, 0),
-                 legend.ticks = element_blank()) + 
-  ggplot2::guides(fill = guide_colorbar(ticks = FALSE,
-                                        barheight = 0.25,
-                                        title.position = "top",
-                                        barwidth = 3))
-setwd(here::here("figures"))
-ggplot2::ggsave(
-  filename = "figure_02d.png", 
-  width = 1.75, 
-  height = 1.75, 
-  units = "in", 
-  dpi = 300
-)
-
+d <- list(list())
 setwd(here::here("data"))
+for(i in 1:length(unique(key$code6))){
+  setwd(here::here(paste0("data/ebird_ranges/", key[[i, "code6"]], "/ranges")))
+  d[[i]] <- sf::st_read(paste0(key[[i, "code6"]], "_range_smooth_27km_2022.gpkg"))
+}
+cold_sp <- c("Alder Flycatcher", "Bay-breasted Warbler", "Blackburnian Warbler", 
+             "Black-backed Woodpecker", "Boreal Chickadee", "Cape May Warbler", 
+             "Canada Warbler", "Connecticut Warbler", "Dark-eyed Junco", "Evening Grosbeak", 
+             "Golden-crowned Kinglet", "Canada Jay", "Hermit Thrush", "Lincoln's Sparrow", 
+             "Magnolia Warbler", "Mourning Warbler", "Nashville Warbler", 
+             "Northern Waterthrush", "Olive-sided Flycatcher", "Palm Warbler", 
+             "Purple Finch", "Red-breasted Nuthatch", "Red Crossbill", "Ruby-crowned Kinglet", 
+             "Ruffed Grouse", "Spruce Grouse", "Swainson's Thrush", "Tennessee Warbler", 
+             "White-throated Sparrow", "White-winged Crossbill", "Winter Wren", 
+             "Wilson's Warbler", "Yellow-bellied Flycatcher", "Yellow-bellied Sapsucker", 
+             "Yellow-rumped Warbler")
 
-key <- readr::read_csv("code_key.csv")
+all <- dplyr::bind_rows(d) |> 
+  dplyr::group_by(species_code) |> 
+  dplyr::mutate( breeding = ifelse(grepl("breeding", season), 1, 0)) |> 
+  dplyr::filter(case_when(breeding == 1 ~ season == "breeding",
+                          T ~ season == "resident")) |> 
+  dplyr::mutate(edge = ifelse(common_name %in% cold_sp, "Trailing edge", "Leading edge")) |> 
+  sf::st_make_valid()
 
-eh <- readr::read_csv("edge_hardness_metrics.csv") |> 
-  dplyr::left_join(key) |> 
-  dplyr::rename(code4 = sp)
+usa <- sf::st_as_sf(maps::map("state", fill=TRUE, plot =FALSE)) 
 
-eh |> 
-  dplyr::mutate( eh_leading = ncold_mean / avgn,
-                 eh_trailing = nwarm_mean / avgn ) |> 
-  dplyr::select( code4, avgn, ti_mean, ti_sd, eh_leading, eh_trailing, cold_mdist, warm_mdist ) |> 
-  dplyr::filter(warm_mdist < 100 ) |> 
-  dplyr::select(code4, avgn, ti_mean, ti_sd, eh_trailing) |> 
-  dplyr::full_join(
-    eh |> 
-      dplyr::mutate( eh_leading = ncold_mean / avgn,
-                     eh_trailing = nwarm_mean / avgn ) |>
-      dplyr::select( code4, avgn, ti_mean, ti_sd, eh_leading, eh_trailing, cold_mdist, warm_mdist ) |> 
-      dplyr::filter(cold_mdist < 100 ) |> 
-      dplyr::select(code4, avgn, ti_mean, ti_sd, eh_leading)) |> 
-  tidyr::pivot_longer(eh_trailing:eh_leading, names_to = "edge", values_to = "hardness") |> 
-  dplyr::filter(!is.na(hardness)) |> 
-  dplyr::mutate(edge = ifelse(grepl("leading", edge), "Leading edge", "Trailing edge")) |>
-  dplyr::mutate(edge = factor(edge, levels = c("Trailing edge", "Leading edge"))) |> 
-  ggplot2::ggplot(aes(x = hardness, fill = edge, color = edge)) + 
-  ggplot2::facet_wrap(~edge) + 
-  ggplot2::geom_histogram(alpha = 0.5) +
-  geom_vline(xintercept = 1, linetype = "dashed", linewidth = 0.75) +
-  ggplot2::scale_fill_manual(values = MetBrewer::MetPalettes$Isfahan1[[1]][c(1,6)]) +
-  ggplot2::scale_color_manual(values = MetBrewer::MetPalettes$Isfahan1[[1]][c(1,5)]) +
-  ggplot2::theme_minimal() +
-  ggplot2::labs(x = "Range edge hardness", 
-                y = "Frequency") +
-  ggplot2::theme(legend.position = "none",
-                 axis.text = element_text(color = "black", size = 11),
-                 axis.title = element_text(color = "black", size = 12), 
-                 strip.text = element_text(color = "black", size = 13), 
-                 panel.background = element_rect(fill = "white", color = NA), 
-                 plot.background = element_rect(fill = "white", color = NA))
+mn <- dplyr::filter(usa, ID == "minnesota") |> 
+  sf::st_transform(crs = st_crs(all))
+
+mn_bbox <- sf::st_as_sfc( st_bbox( mn ) )
+
+all_crop <- sf::st_intersection( all, mn )
+
+pts <- coords |> 
+  sf::st_transform(crs = st_crs(all))
+
+( main_map <- ggplot2::ggplot() + 
+    ggplot2::geom_sf(data = all_crop, aes(geometry = geom, fill = edge, color = edge), alpha = 0.2) +
+    ggplot2::geom_sf(data = mn, aes(geometry = geom), fill = NA, color = "black", linewidth = 1) +
+    ggplot2::geom_sf(data = pts, pch = 21, color = "black", fill = "white") +
+    ggplot2::scale_color_manual("Edge",
+                                values = MetBrewer::MetPalettes$Isfahan1[[1]][c(5,1)]) +
+    ggplot2::scale_fill_manual("Edge",
+                               values = MetBrewer::MetPalettes$Isfahan1[[1]][c(5,1)]) +
+    ggplot2::theme_void()+
+    ggplot2::guides(fill = guide_legend(override.aes = list(alpha = 1))) +
+    ggplot2::theme(legend.position = "bottom",
+                   legend.title = element_blank(),
+                   legend.text = element_text(size = 11, color = "black"),
+                   plot.background = element_rect(fill = "white", color = NA), 
+                   panel.background = element_rect(fill = "white", color = NA),
+                   plot.margin = margin(0, 0, 5, 0, unit = "pt")) +
+    ggspatial::annotation_scale(location = "tr") )
+
+( inset <- ggplot() +
+    geom_sf(data = usa) +
+    geom_sf(data = filter(usa, ID == "minnesota"), fill = "gray20") +
+    theme_void() +
+    theme(plot.background = element_rect(color = "black", 
+                                         fill = "white")) )
+
+
+( figure_02 <- cowplot::ggdraw(main_map) +
+    cowplot::draw_plot(
+      {
+        inset
+      },
+      x = 0.65,
+      y = 0.3, 
+      width = 0.3,
+      height = 0.3
+    )
+)
 
 setwd(here::here("figures"))
-ggplot2::ggsave(
-  filename = "figure_02e.png",  width = 5, 
-  height = 2.5,
-  units = "in", 
-  dpi = 300
-)  
+ggsave(
+  filename = "figure_02.png", 
+  plot = figure_02,
+  width = 4, 
+  height = 4.75, 
+  units ="in", 
+  dpi = 600
+)
