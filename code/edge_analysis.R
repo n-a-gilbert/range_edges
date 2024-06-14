@@ -6,17 +6,17 @@ library(janitor)
 setwd(here::here("results"))
 # this file is too large (~2GB) to store on GitHub
 # Download from this onedrive link to "results" folder of repo
-# https://1drv.ms/u/s!AtvYBfNq7AMkg4llzxN7tWMFyvXUCQ?e=IITVjK
-m <- readRDS("brms_results_2023-11-01.rds")
+# https://1drv.ms/u/s!AtvYBfNq7AMkhKgyHsRmtvRMK0WCbQ?e=wWFud5
+m <- readRDS("brms_results_2024-05-15.rds")
 
-sp_trends <- brms::ranef( m, pars = "yr")[[1]] |> 
+sp_trends <- brms::ranef( m, pars = "year")[[1]] |> 
   tibble::as_tibble(rownames = "sp") |> 
   setNames(c("sp", "mean", "sd", "l95", "u95")) |> 
   dplyr::mutate(sp = as.numeric(sp))
 
 setwd(here::here("data"))
 
-load("formatted_data_for_model.RData")
+load("brms_data_revision.RData")
 
 key <- read_csv("code_key.csv")
 
@@ -24,32 +24,29 @@ eh <- read_csv("edge_hardness_metrics.csv") |>
   dplyr::left_join(key) |> 
   dplyr::rename(code4 = sp) |> 
   dplyr::right_join( 
-    ncap |> 
-      dplyr::select(sp, code4) |> 
+    df |> 
+      dplyr::select(sp, code4 = code) |> 
       dplyr::distinct() )
 
-# "Cold" species, aka trailing-edge species
-cold_sp <- eh |> 
+trailing_sp <- eh |> 
   dplyr::filter(warm_mdist <= 100) |> 
   dplyr::mutate(rel_nwarm = as.numeric(scale(log(nwarm_mean / avgn))), 
                 ti_mean = as.numeric(scale(ti_mean)))
 
-# "Warm" species, aka leading-edge species
-warm_sp <- eh |> 
+leading_sp <- eh |> 
   dplyr::filter(cold_mdist <= 100) |> 
   dplyr::mutate(rel_ncold = as.numeric(scale(log(nwarm_mean / avgn))), 
                 ti_mean = as.numeric(scale(ti_mean)))
 
-
-cold_trends <- cold_sp |> 
+trailing_trends <- trailing_sp |> 
   left_join(sp_trends)
 
-warm_trends <- warm_sp |> 
+leading_trends <- leading_sp |> 
   left_join(sp_trends)
 
-trend_posterior <- brms::posterior_samples( m, pars = "yr") |> 
+trend_posterior <- brms::posterior_samples( m, pars = "year") |> 
   tibble::as_tibble(rownames = "iter") |> 
-  tidyr::pivot_longer(2:100, names_to = "param", values_to = "value") |> 
+  tidyr::pivot_longer(2:59, names_to = "param", values_to = "value") |> 
   dplyr::filter( grepl("r_sp\\[", param)) |> 
   dplyr::mutate(sp = readr::parse_number(param)) |> 
   dplyr::select(sp, value) |> 
@@ -60,29 +57,33 @@ trend_posterior <- brms::posterior_samples( m, pars = "yr") |>
 
 samples_to_select <- sort(sample(1:max(trend_posterior$sample), 1000, replace = FALSE ))
 
-final_warm <- trend_posterior |> 
+final_leading <- trend_posterior |> 
   dplyr::filter( sample %in% samples_to_select ) |> 
   dplyr::group_by(sp ) |> 
   dplyr::mutate(new_sample = row_number()) |> 
-  dplyr::select( sp, sample = new_sample, value) |> 
-  dplyr::right_join(warm_sp) |> 
-  dplyr::select(sp, code4,
-                sample, value,
-                rel_ncold, ti_mean ) |> 
-  dplyr::ungroup() 
+  dplyr::select( sp, sample = new_sample, trend = value,) |> 
+  dplyr::right_join(leading_sp) |> 
+  dplyr::select(sp,
+                code4,
+                sample,
+                trend,
+                eh = rel_ncold,
+                ti = ti_mean ) |> 
+  ungroup()
 
-final_cold <- trend_posterior |> 
+final_trailing <- trend_posterior |> 
   dplyr::filter( sample %in% samples_to_select ) |> 
   dplyr::group_by(sp ) |> 
   dplyr::mutate(new_sample = row_number()) |> 
-  dplyr::select( sp, sample = new_sample, value) |> 
-  dplyr::right_join(cold_sp) |> 
-  dplyr::select(sp, code4,
-                sample, value,
-                rel_nwarm, ti_mean ) |> 
+  dplyr::select( sp, sample = new_sample, trend = value) |> 
+  dplyr::right_join(trailing_sp) |> 
+  dplyr::select(sp,
+                code4,
+                sample,
+                trend,
+                eh = rel_nwarm,
+                ti = ti_mean ) |> 
   dplyr::ungroup() 
-
-rm(m)
 
 res_trailing <- list(list())
 res_leading <- list(list())
@@ -90,11 +91,11 @@ res_leading <- list(list())
 for( i in 1:1000){
   
   leading <- brm( 
-    value ~ ti_mean + rel_ncold + ti_mean:rel_ncold,
-    data = dplyr::filter(final_warm, sample == i),
+    trend ~ 1 + ti + eh + ti:eh,
+    data = dplyr::filter(final_leading, sample == i),
     family = gaussian(), 
-    prior = c(prior(normal(0, 1), class = Intercept), 
-              prior(normal(0, 0.25), class = b))
+    prior = c(prior(normal(0, 2), class = Intercept), 
+              prior(normal(0, 1), class = b))
   )
   
   res_leading[[i]] <- brms::posterior_samples( leading ) |> 
@@ -102,11 +103,11 @@ for( i in 1:1000){
     tibble::add_column( run = i)
   
   trailing <- brm( 
-    value ~ ti_mean + rel_nwarm + ti_mean:rel_nwarm,
-    data = dplyr::filter(final_cold, sample == i),
+    trend ~ 1 + ti + eh + ti:eh,
+    data = dplyr::filter(final_trailing, sample == i),
     family = gaussian(), 
-    prior = c(prior(normal(0, 1), class = Intercept), 
-              prior(normal(0, 0.25), class = b))
+    prior = c(prior(normal(0, 2), class = Intercept), 
+              prior(normal(0, 1), class = b))
   )
   
   res_trailing[[i]] <- brms::posterior_samples( trailing ) |> 
@@ -118,12 +119,6 @@ for( i in 1:1000){
 
 setwd(here::here("results"))
 
-all_trailing <- dplyr::bind_rows(res_trailing) |> 
-  janitor::clean_names()
+save(res_trailing, file = "edge_analysis_trailing.RData")
 
-save(all_trailing, file = "trailing_edge_analysis.RData")
-
-all_leading <- dplyr::bind_rows(res_leading) |> 
-  janitor::clean_names()
-
-save(all_leading, file = "leading_edge_analysis.RData")
+save(res_leading, file = "edge_analysis_leading.RData")
