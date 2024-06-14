@@ -85,28 +85,31 @@ ncap_template <- expand.grid(
   dplyr::select(-not_surveyed) |> 
   dplyr::full_join( dplyr::distinct(dplyr::select(dc, sp, common) ) )
 
-ncap <- dc |>
-  dplyr::group_by( site, year, sp) |>
+df <- dc |>
+  dplyr::group_by( site, stand, year, sp, doy, obs) |>
   dplyr::count() |>
   dplyr::right_join(ncap_template) |>
   dplyr::arrange( site, sp, year) |>
   dplyr::mutate(n = ifelse(is.na(n), 0, n)) |>
   dplyr::ungroup() |>
-  dplyr::group_by(site) |>
-  dplyr::mutate(site_id = cur_group_id()) |>
+  dplyr::group_by(stand) |>
+  dplyr::mutate(stand_id = cur_group_id()) |>
   dplyr::group_by(year) |>
   dplyr::mutate(year_id = cur_group_id()) |>
   dplyr::group_by( sp ) |>
   dplyr::mutate(sp_id = cur_group_id()) |>
   dplyr::ungroup() |>
-  dplyr::arrange(sp_id, site_id, year_id) |>
-  dplyr::mutate(yr = as.numeric(scale(year))) |> 
+  dplyr::arrange(sp_id, stand_id, year_id) |>
+  dplyr::mutate(yr = as.numeric(scale(year)),
+                doy = as.numeric(scale(doy))) |> 
   dplyr::select(sp = sp_id,
-                code4 = sp,
+                code = sp,
                 common,
-                site = site_id,
-                yr,
+                stand = stand_id,
+                obs = obs,
+                year = yr,
+                doy = doy,
                 y = n )
 
 setwd(here::here("data"))
-save(ncap, file = "formatted_data_for_model.RData")
+save(df, file = "brms_data_revision.RData")
