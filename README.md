@@ -19,10 +19,14 @@ Poleward and uphill range shifts are a common but variable response to anthropog
 * [calculate_range_metrics.R](./code/calculate_range_metrics.R) Code to calculate range edge hardness metrics using eBird maps and WorldClim
 * [edge_analysis.R](./code/edge_analysis.R) Code to run models for Step 2: population trend modeled by temperature index and range edge hardness
 * [format_data.R](./code/format_data.R) Code to format raw data for Step 1
+* [phylogenetic_regression_subsets.R](./code/phylogenetic_regression_subsets.R) Code to fit PGLMMs to subsets of the dataset (see Supplement)
 * [run_brms_model.R](./code/run_brms_model.R) Code to run the model for Step 1
 
 ### [data](./data): Contains data for analyses
 * [ebird_abundance](./data/ebird_abundance) Folder containing breeding season abundance rasters from eBird for each species
+* [ebird_ranges](./data/ebird_ranges) Folder containing breeding season range maps from eBird for each species
+* [brms_data_revision.RData](./data/brms_data_revision.RData) Formatted data for brms model
+* [brms_data_revision2.RData](./data/brms_data_revision2.RData) Formatted data with phylo info
 * [code_key.csv](./data/code_key.csv) Key with species common names, scientific names, 4 letter code, and 6-letter code
 * [coordinates.csv](./data/coordinates.csv) Site coordinates for calculating proximity to range edges; cannot be linked to bird survey data
 * [edge_hardness_metrics.csv](./data/edge_hardness_metrics.csv) Range metrics for each species
