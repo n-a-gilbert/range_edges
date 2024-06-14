@@ -19,10 +19,14 @@ Poleward and uphill range shifts are a common but variable response to anthropog
 * [calculate_range_metrics.R](./code/calculate_range_metrics.R) Code to calculate range edge hardness metrics using eBird maps and WorldClim
 * [edge_analysis.R](./code/edge_analysis.R) Code to run models for Step 2: population trend modeled by temperature index and range edge hardness
 * [format_data.R](./code/format_data.R) Code to format raw data for Step 1
+* [phylogenetic_regression_subsets.R](./code/phylogenetic_regression_subsets.R) Code to fit PGLMMs to subsets of the dataset (see Supplement)
 * [run_brms_model.R](./code/run_brms_model.R) Code to run the model for Step 1
 
 ### [data](./data): Contains data for analyses
 * [ebird_abundance](./data/ebird_abundance) Folder containing breeding season abundance rasters from eBird for each species
+* [ebird_ranges](./data/ebird_ranges) Folder containing breeding season range maps from eBird for each species
+* [brms_data_revision.RData](./data/brms_data_revision.RData) Formatted data for brms model
+* [brms_data_revision2.RData](./data/brms_data_revision2.RData) Formatted data with phylo info
 * [code_key.csv](./data/code_key.csv) Key with species common names, scientific names, 4 letter code, and 6-letter code
 * [coordinates.csv](./data/coordinates.csv) Site coordinates for calculating proximity to range edges; cannot be linked to bird survey data
 * [edge_hardness_metrics.csv](./data/edge_hardness_metrics.csv) Range metrics for each species
@@ -31,18 +35,25 @@ Poleward and uphill range shifts are a common but variable response to anthropog
 
 ### [figures](./figures): Contains figures and code for figures
 * [code_for_figures](./figures/code_for_figures) Folder with scripts to create figures
-  * [figure_02.R](./figures/code_for_figures/figure_02.R) Script to create each panel for Figure 2
-  * [figure_03.R](./figures/code_for_figures/figure_03.R) Script to create Figure 3
-  * [figure_s1_sr.R](./figures/code_for_figures/figure_s1_s2.R) Script to create Figures S1 and S2
-  * [figure_s3.R](./figures/code_for_figures/figure_s3.R) Script to create Figure S3
+  * [figure_02.R](./figures/code_for_figures/figure_02.R) Script to create Figure 2
+  * [figure_03.R](./figures/code_for_figures/figure_03.R) Script to create Figure 3 panels
+  * [figure_04.R](./figures/code_for_figures/figure_04.R) Script to create Figure 4
+  * [figure_05.R](./figures/code_for_figures/figure_05.R) Script to create Figure 5
+  * [figure_s01.R](./figures/code_for_figures/figure_s01.R) Script to create Figure S1
+  * [figure_s02.R](./figures/code_for_figures/figure_s02.R) Script to create Figure S2
+  * [figure_s03.R](./figures/code_for_figures/figure_s03.R) Script to create Figure S3
+  * [figure_s04.R](./figures/code_for_figures/figure_s04.R) Script to create Figure S4
 * [figure_01.png](./figures/figure_01.png) Figure 1
 * [figure_01.pptx](./figures/figure_01.pptx) Figure 1 (created in Powerpoint)
 * [figure_02.png](./figures/figure_02.png) Figure 2
-* [figure_02.pptx](./figures/figure_02.pptx) Figure 2 (panels assembled in Powerpoint)
 * [figure_03.png](./figures/figure_03.png) Figure 3
-* [figure_s1.png](./figures/figure_s1.png) Figure S1
+* [figure_03.pptx](./figures/figure_03.pptx) Figure 3 (panels assembled in Powerpoint)
+* [figure_04.png](./figures/figure_04.png) Figure 4
+* [figure_05.png](./figures/figure_05.png) Figure 5
+* [figure_s01.png](./figures/figure_s01.png) Figure S1
 * [figure_s2.png](./figures/figure_s2.png) Figure S2
 * [figure_s3.png](./figures/figure_s3.png) Figure S3
+* [figure_s4.png](./figures/figure_s4.png) Figure S4
 
 ### results NOTE: the files with model results are too large to share on GitHub; download links provided
 * brms_results_2023-11-01.rds: Results from Step 1. [Download link](https://1drv.ms/u/s!AtvYBfNq7AMkg4llzxN7tWMFyvXUCQ?e=IITVjK)
