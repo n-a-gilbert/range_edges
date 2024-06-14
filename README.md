@@ -50,10 +50,10 @@ Poleward and uphill range shifts are a common but variable response to anthropog
 * [figure_03.pptx](./figures/figure_03.pptx) Figure 3 (panels assembled in Powerpoint)
 * [figure_04.png](./figures/figure_04.png) Figure 4
 * [figure_05.png](./figures/figure_05.png) Figure 5
-*[figure_s01.png](./figures/figure_s01.png) Figure S1
-*[figure_s2.png](./figures/figure_s2.png) Figure S2
-*[figure_s3.png](./figures/figure_s3.png) Figure S3
-*[figure_s4.png](./figures/figure_s4.png) Figure S4
+* [figure_s01.png](./figures/figure_s01.png) Figure S1
+* [figure_s2.png](./figures/figure_s2.png) Figure S2
+* [figure_s3.png](./figures/figure_s3.png) Figure S3
+* [figure_s4.png](./figures/figure_s4.png) Figure S4
 
 ### results NOTE: the files with model results are too large to share on GitHub; download links provided
 * brms_results_2023-11-01.rds: Results from Step 1. [Download link](https://1drv.ms/u/s!AtvYBfNq7AMkg4llzxN7tWMFyvXUCQ?e=IITVjK)
