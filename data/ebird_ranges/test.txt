@@ -1,0 +1,10 @@
+
+Front Matter,
+Editor(s): Marc Kéry, J. Andrew Royle,
+Applied Hierarchical Modeling in Ecology,
+Academic Press,
+2016,
+Page i,
+ISBN 9780128013786,
+https://doi.org/10.1016/B978-0-12-801378-6.01001-8.
+(https://www.sciencedirect.com/science/article/pii/B9780128013786010018)
