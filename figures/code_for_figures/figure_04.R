@@ -7,7 +7,7 @@ library(janitor)
 
 setwd(here::here("results"))
 # File too big to push to GitHub; download from link to local repo
-# https://1drv.ms/u/s!AtvYBfNq7AMkg4llzxN7tWMFyvXUCQ?e=IITVjK
+# https://1drv.ms/u/s!AtvYBfNq7AMkhKgyHsRmtvRMK0WCbQ?e=brZbkY
 m <- readRDS("brms_results_2024-05-15.rds")
 
 sp_trends <- brms::ranef( m, pars = "year")[[1]] |> 
@@ -16,15 +16,16 @@ sp_trends <- brms::ranef( m, pars = "year")[[1]] |>
   dplyr::mutate(sp = as.numeric(sp))
 
 rm(m)
+
 # File too big to push to GitHub; download from link to local repo
-# https://1drv.ms/u/s!AtvYBfNq7AMkg4lFAGeIc--nllbz_g?e=dX3CiS
+# https://1drv.ms/u/s!AtvYBfNq7AMkhKsz13VTqKFps_McQg?e=ARAvj8
 load("edge_analysis_leading.RData")
 
 all_leading <- dplyr::bind_rows(leading_results) |> 
   janitor::clean_names()
 
 # File too big to push to GitHub; download from link to local repo
-# https://1drv.ms/u/s!AtvYBfNq7AMkg4lG4AFyCAWyMD1LTg?e=Q4z4ja
+# https://1drv.ms/u/s!AtvYBfNq7AMkhKsyxZokyDlvJtbZTA?e=sb7jw2
 load("edge_analysis_trailing.RData")
 
 all_trailing <- dplyr::bind_rows(trailing_results) |> 
@@ -118,7 +119,7 @@ plot_leading_unscaled <- plot_leading |>
                   attr(leading_eh_scaled , "scaled:center")) |> 
   dplyr::mutate(rel_ncold_raw = exp(rel_ncold_unscaled))
 
-strip <- ggh4x::strip_themed(text_x = elem_list_text(color = MetBrewer::MetPalettes$Isfahan1[[1]][c(1,5)]))
+strip <- ggh4x::strip_themed(text_x = elem_list_text(color = MetBrewer::MetPalettes$Isfahan1[[1]][c(1,7)]))
 
 model_predictions <- plot_leading_unscaled |> 
   dplyr::rename( edge_hardness = rel_ncold_raw) |> 
@@ -167,9 +168,9 @@ ggplot() +
                 color = edge),
             size = 2, show.legend = FALSE) +
   ggplot2::scale_color_manual("Edge", 
-                              values = MetBrewer::MetPalettes$Isfahan1[[1]][c(1,5)]) +
+                              values = MetBrewer::MetPalettes$Isfahan1[[1]][c(1,7)]) +
   ggplot2::scale_fill_manual("Edge", 
-                             values = MetBrewer::MetPalettes$Isfahan1[[1]][c(1,5)]) +
+                             values = MetBrewer::MetPalettes$Isfahan1[[1]][c(1,7)]) +
   
   labs(
     x = "Range edge hardness",

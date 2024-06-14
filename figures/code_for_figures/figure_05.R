@@ -11,7 +11,7 @@ load("edge_analysis_leading.RData")
 all_leading <- dplyr::bind_rows(leading_results) |> 
   janitor::clean_names()
 
-load("edge_analysis_trailing_no_CONW.RData")
+load("edge_analysis_trailing.RData")
 
 all_trailing <- dplyr::bind_rows(trailing_results) |> 
   janitor::clean_names()
@@ -70,7 +70,7 @@ ggplot2::ggplot( est, aes(x = mean, y = param, color = edge)) +
 
 setwd(here::here("figures"))
 ggplot2::ggsave(
-  "figure_s3.png", 
+  "figure_05.png", 
   width = 5, 
   height = 2.5,
   units = "in", 
