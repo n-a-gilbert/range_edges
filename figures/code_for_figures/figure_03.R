@@ -141,9 +141,9 @@ edges_df <- as.data.frame(edges_spdf)
     ggplot2::geom_tile() + 
     ggplot2::coord_fixed(1.3) +
     ggplot2::scale_color_manual("Edge", 
-                                values = MetBrewer::MetPalettes$Isfahan1[[1]][c(5,1)]) +
+                                values = MetBrewer::MetPalettes$Isfahan1[[1]][c(7,1)]) +
     ggplot2::scale_fill_manual("Edge", 
-                               values = MetBrewer::MetPalettes$Isfahan1[[1]][c(5,1)]) +
+                               values = MetBrewer::MetPalettes$Isfahan1[[1]][c(7,1)]) +
     ggplot2::theme_void() +
     ggplot2::theme(legend.position = "bottom",
                    legend.text = element_text(color = "black",size = 9), 
@@ -231,8 +231,8 @@ eh |>
   ggplot2::facet_wrap(~edge) + 
   ggplot2::geom_histogram(alpha = 0.5) +
   geom_vline(xintercept = 1, linetype = "dashed", linewidth = 0.75) +
-  ggplot2::scale_fill_manual(values = MetBrewer::MetPalettes$Isfahan1[[1]][c(1,6)]) +
-  ggplot2::scale_color_manual(values = MetBrewer::MetPalettes$Isfahan1[[1]][c(1,5)]) +
+  ggplot2::scale_fill_manual(values = MetBrewer::MetPalettes$Isfahan1[[1]][c(1,8)]) +
+  ggplot2::scale_color_manual(values = MetBrewer::MetPalettes$Isfahan1[[1]][c(1,7)]) +
   ggplot2::theme_minimal() +
   ggplot2::labs(x = "Range edge hardness", 
                 y = "Frequency") +
