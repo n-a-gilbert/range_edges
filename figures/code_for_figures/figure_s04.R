@@ -70,7 +70,7 @@ ggplot2::ggplot( est, aes(x = mean, y = param, color = edge)) +
 
 setwd(here::here("figures"))
 ggplot2::ggsave(
-  "figure_s4.png", 
+  "figure_s04.png", 
   width = 5, 
   height = 2.5,
   units = "in", 

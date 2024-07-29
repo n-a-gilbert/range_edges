@@ -61,7 +61,7 @@ ggtree(mytree, layout = "circular") %<+% info +
 
 setwd(here::here("figures"))
 ggsave(
-  filename = "figure_s5.png", 
+  filename = "figure_s05.png", 
   width = 5, 
   height = 5, 
   units = "in", 

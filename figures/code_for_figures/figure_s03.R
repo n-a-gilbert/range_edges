@@ -187,7 +187,7 @@ ggplot() +
 
 setwd(here::here("figures"))
 ggsave(
-  "figure_s3.png", 
+  "figure_s03.png", 
   width = 4, 
   height = 6, 
   units = "in", 
