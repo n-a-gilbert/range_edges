@@ -43,6 +43,7 @@ Poleward and uphill range shifts are a common—but variable—response to clima
   * [figure_s02.R](./figures/code_for_figures/figure_s02.R) Script to create Figure S2
   * [figure_s03.R](./figures/code_for_figures/figure_s03.R) Script to create Figure S3
   * [figure_s04.R](./figures/code_for_figures/figure_s04.R) Script to create Figure S4
+  * [figure_s05.R](./figures/code_for_figures/figure_s05.R) Script to create Figure S5
 * [figure_01.png](./figures/figure_01.png) Figure 1
 * [figure_01.pptx](./figures/figure_01.pptx) Figure 1 (created in Powerpoint)
 * [figure_02.png](./figures/figure_02.png) Figure 2
@@ -51,9 +52,10 @@ Poleward and uphill range shifts are a common—but variable—response to clima
 * [figure_04.png](./figures/figure_04.png) Figure 4
 * [figure_05.png](./figures/figure_05.png) Figure 5
 * [figure_s01.png](./figures/figure_s01.png) Figure S1
-* [figure_s2.png](./figures/figure_s2.png) Figure S2
-* [figure_s3.png](./figures/figure_s3.png) Figure S3
-* [figure_s4.png](./figures/figure_s4.png) Figure S4
+* [figure_s02.png](./figures/figure_s02.png) Figure S2
+* [figure_s03.png](./figures/figure_s03.png) Figure S3
+* [figure_s04.png](./figures/figure_s04.png) Figure S4
+* [figure_s05.png](./figures/figure_s05.png) Figure S5
 
 ### results NOTE: the files with model results are too large to share on GitHub; download links provided
 * brms_results_2024-05-15.rds: Results from Step 1. [Download link](https://1drv.ms/u/s!AtvYBfNq7AMkhKgyHsRmtvRMK0WCbQ?e=aQp17C)
