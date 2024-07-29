@@ -1,69 +1,78 @@
-# plot trends on phylogeny
-
-library(here)
 library(tidyverse)
-library(brms)
-library(avotrex)
+library(here)
+library(ggh4x)
+library(janitor)
 library(MetBrewer)
-library(ggtree)
-
-data(BirdTree_trees)
-
-phy <- BirdTree_trees[[1]]
-tax <- BirdTree_tax |> 
-  tibble::as_tibble()
-
-setwd(here::here("data"))
-
-load("brms_data_revision.RData")
-
-key <- df |> 
-  dplyr::select(sp, code, common) |> 
-  dplyr::distinct()
 
 setwd(here::here("results"))
-# too big for github
-# available for download: https://1drv.ms/u/s!AtvYBfNq7AMkhKgyHsRmtvRMK0WCbQ?e=7CjAgm
-m <- readRDS("brms_results_2024-05-15.rds")
 
-trends <- brms::ranef( m, pars = "year")[[1]] |> 
-  tibble::as_tibble(rownames = "sp") |> 
-  stats::setNames(c("sp", "mean", "sd", "l95", "u95")) |> 
-  dplyr::mutate(sp = as.numeric(sp)) |> 
-  dplyr::full_join(key) |> 
-  dplyr::mutate(English = common) |> 
-  dplyr::mutate( English = ifelse(common == "Canada Jay", "Grey Jay", English)) |>   
-  dplyr::mutate( English = ifelse(common == "Eastern Wood-Pewee",
-                                  "Eastern Wood-pewee", English))|> 
-  dplyr::select(sp, code, common, English, mean:u95)
+load("edge_analysis_leading.RData")
 
-not_data <- tax |> 
-  dplyr::anti_join(trends)
+all_leading <- dplyr::bind_rows(leading_results) |> 
+  janitor::clean_names()
 
-mytree <- ape::drop.tip( phy, not_data$TipLabel)
+load("edge_analysis_trailing_no_CONW.RData")
 
-final <- trends |>
-  dplyr::left_join(tax) |>
-  dplyr::select(sp, code, common, tip.label = TipLabel, mean:u95)
+all_trailing <- dplyr::bind_rows(trailing_results) |> 
+  janitor::clean_names()
 
-info <- tibble(tip.label = mytree$tip.label) |>
-  dplyr::left_join(final)
+est <- all_leading |> 
+  dplyr::select(run, sample, b_ti:b_ti_eh) |> 
+  tidyr::pivot_longer(b_ti:b_ti_eh, names_to = "param", values_to = "val") |> 
+  dplyr::group_by(param) |> 
+  dplyr::summarise( mean = mean(val), 
+                    l95 = quantile(val, c(0.025)), 
+                    l68 = quantile(val, c(0.160)), 
+                    u68 = quantile(val, c(0.840)), 
+                    u95 = quantile(val, c(0.975))) |> 
+  dplyr::mutate(param = ifelse(param == "b_eh", "Edge hardness", 
+                               ifelse(param == "b_ti", "Temperature", "Edge hardness x Temperature"))) |> 
+  tibble::add_column( edge = "Leading edge") |> 
+  dplyr::full_join(
+    all_trailing |> 
+      dplyr::select(run, sample, b_ti:b_ti_eh) |> 
+      tidyr::pivot_longer(b_ti:b_ti_eh, names_to = "param", values_to = "val") |> 
+      dplyr::group_by(param) |> 
+      dplyr::summarise( mean = mean(val), 
+                        l95 = quantile(val, c(0.025)), 
+                        l68 = quantile(val, c(0.160)), 
+                        u68 = quantile(val, c(0.840)), 
+                        u95 = quantile(val, c(0.975))) |> 
+      dplyr::mutate(param = ifelse(param == "b_eh", "Edge hardness", 
+                                   ifelse(param == "b_ti", "Temperature", "Edge hardness x Temperature"))) |> 
+      tibble::add_column( edge = "Trailing edge")
+  ) |> 
+  dplyr::mutate(param = factor(param, levels = c("Edge hardness x Temperature",
+                                                 "Temperature",
+                                                 "Edge hardness"))) |> 
+  dplyr::mutate(edge = factor(edge, levels = c("Trailing edge", "Leading edge")))
 
-ggtree(mytree, layout = "circular") %<+% info +
-  geom_tippoint(aes(color = mean), size = 3) + 
-  geom_tiplab(aes(label = code), offset = 5) +
-  scale_color_gradient2(
-    "Trend",
-    low = MetBrewer::MetPalettes$Ingres[[1]][7], 
-    mid = "gray95", 
-    high = MetBrewer::MetPalettes$Ingres[[1]][4]) +
-  theme(legend.ticks = element_blank())
+strip <- ggh4x::strip_themed(text_x = elem_list_text(color = MetBrewer::MetPalettes$Isfahan1[[1]][c(1,7)]))
+
+ggplot2::ggplot( est, aes(x = mean, y = param, color = edge)) + 
+  ggh4x::facet_wrap2(~edge, strip = strip) +
+  ggplot2::geom_vline(xintercept = 0, linetype = "dashed") +
+  ggplot2::geom_errorbar(aes(xmin = l95, xmax = u95), width = 0) +
+  ggplot2::geom_errorbar(aes(xmin = l68, xmax = u68), width = 0, size = 1.5) +
+  ggplot2::geom_point(size = 3) +
+  ggplot2::scale_color_manual("Edge", 
+                              values = MetBrewer::MetPalettes$Isfahan1[[1]][c(1,7)]) +
+  ggplot2::theme_minimal() +
+  ggplot2::labs(x = "Coefficient estimate") +
+  ggplot2::theme(
+    legend.position = "none",
+    axis.title.y = element_blank(),
+    axis.text = element_text(size = 10, color = "black"), 
+    axis.title = element_text(size = 11, color = "black"), 
+    strip.text = element_text(size = 11, face = "bold"),
+    panel.background = element_rect(fill = "white", color = NA), 
+    plot.background = element_rect(fill = "white", color = NA))
 
 setwd(here::here("figures"))
-ggsave(
-  filename = "figure_s4.png", 
+ggplot2::ggsave(
+  "figure_s4.png", 
   width = 5, 
-  height = 5, 
+  height = 2.5,
   units = "in", 
   dpi = 600
 )
