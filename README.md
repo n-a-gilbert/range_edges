@@ -2,7 +2,7 @@
 
 ### [Neil A. Gilbert](https://gilbertecology.com), [Stephen R. Kolbe](https://nrri.umn.edu/faculty-staff/steve-kolbe-ms), [Harold N. Eyster](https://eyster.com/), [Alexis R. Grinde](https://nrri.umn.edu/faculty-staff/alexis-grinde-phd)
 
-### Data/code DOI: To be added upon acceptance
+### Data/code DOI: [![DOI](https://zenodo.org/badge/747897477.svg)](https://zenodo.org/doi/10.5281/zenodo.13313905)
 
 #### Please contact the first author for questions about the code or data: Neil A. Gilbert (neil.allen.gilbert@gmail.com)
 __________________________________________________________________________________________________________________________________________
